@@ -103,10 +103,9 @@
   // ---- CONFIG (set at deploy) -------------------------------------------------
   // Direct Google review link (4-5 stars go here).
   var GOOGLE_REVIEW_URL = "https://g.page/r/CWX7EnTT1gPjEBM/review";
-  // Optional: POST endpoint that emails/logs private feedback (e.g. a Google Apps
-  // Script web app). If blank, the page falls back to opening the visitor's mail
-  // client prefilled to the facility. See DEPLOY.md.
-  var FEEDBACK_ENDPOINT = "";
+  // Apps Script relay on the info@lifetimeccs.com account — captures private feedback
+  // and emails it to the facility. (Cross-origin, so we POST no-cors fire-and-forget.)
+  var FEEDBACK_ENDPOINT = "https://script.google.com/macros/s/AKfycbwkflWl6pan5wEjaLbN6PpUWcmR1ZFENJ2HBCTvOXc9Y9c7QGyJBMmpxlEmj_MFFFBYCA/exec";
   var FEEDBACK_EMAIL = "info@lifetimeccs.com";
   // ----------------------------------------------------------------------------
 
@@ -141,6 +140,7 @@
 
   document.getElementById('fb-send').addEventListener('click', function(){
     var payload = {
+      type: 'feedback',
       rating: rating,
       message: document.getElementById('fb-text').value.trim(),
       name: document.getElementById('fb-name').value.trim(),
@@ -150,8 +150,9 @@
     };
     var done = function(){ show('step-thanks'); };
     if(FEEDBACK_ENDPOINT){
-      fetch(FEEDBACK_ENDPOINT, { method:'POST', headers:{'Content-Type':'application/json'},
-                                body: JSON.stringify(payload) })
+      // no-cors fire-and-forget: the relay emails the feedback to info@ server-side;
+      // we can't read the opaque response, so we optimistically show the thank-you.
+      fetch(FEEDBACK_ENDPOINT, { method:'POST', mode:'no-cors', body: JSON.stringify(payload) })
         .then(done).catch(function(){ mailtoFallback(payload); done(); });
     } else {
       mailtoFallback(payload); done();
