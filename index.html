@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Rate your experience — Lifetime Climate Controlled Storage</title>
+<style>
+  :root{ --blue:#2b6cb0; --ink:#1f2933; --muted:#6b7280; --bg:#f3f6fb; --card:#fff; --good:#75DB98; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--ink);
+        font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+        line-height:1.5; -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:520px; margin:0 auto; padding:28px 18px 48px; }
+  .card{ background:var(--card); border-radius:16px; padding:28px 24px;
+         box-shadow:0 6px 28px rgba(20,40,80,.10); text-align:center; }
+  .logo{ max-width:230px; height:auto; margin:4px auto 18px; display:block; }
+  h1{ font-size:22px; margin:0 0 6px; }
+  .sub{ color:var(--muted); margin:0 0 22px; font-size:15px; }
+  .stars{ display:flex; justify-content:center; gap:6px; margin:8px 0 4px; }
+  .star{ font-size:42px; cursor:pointer; background:none; border:none; padding:4px;
+         filter:grayscale(1) opacity(.45); transition:transform .12s, filter .12s; }
+  .star:hover, .star.lit{ filter:none; transform:scale(1.12); }
+  .scale{ display:flex; justify-content:space-between; color:var(--muted); font-size:12px;
+          margin:2px 6px 0; }
+  .panel{ display:none; margin-top:22px; text-align:left; }
+  .panel.show{ display:block; animation:fade .25s ease; }
+  @keyframes fade{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
+  textarea, input{ width:100%; border:1px solid #d6dde8; border-radius:10px; padding:12px;
+                   font:inherit; margin-top:8px; }
+  textarea{ min-height:110px; resize:vertical; }
+  .btn{ display:inline-block; width:100%; margin-top:14px; background:var(--blue); color:#fff;
+        border:none; border-radius:10px; padding:14px; font-size:16px; font-weight:600;
+        cursor:pointer; text-decoration:none; }
+  .btn:active{ opacity:.9; }
+  .note{ color:var(--muted); font-size:13px; margin-top:14px; }
+  .foot{ text-align:center; color:var(--muted); font-size:12px; margin-top:20px; }
+  .foot a{ color:var(--blue); text-decoration:none; }
+  .hidden{ display:none !important; }
+  .big{ font-size:40px; margin:6px 0 2px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <img class="logo" src="https://lifetimeccs.com/lifetime-logo.jpg"
+         alt="Lifetime Climate Controlled Storage"
+         onerror="this.style.display='none'">
+
+    <!-- STEP 1 — rating -->
+    <div id="step-rate">
+      <h1>How was your experience?</h1>
+      <p class="sub">Your feedback helps our small, local team at Lifetime Climate Controlled Storage.</p>
+      <div class="stars" id="stars">
+        <button class="star" data-v="1" aria-label="1 star">★</button>
+        <button class="star" data-v="2" aria-label="2 stars">★</button>
+        <button class="star" data-v="3" aria-label="3 stars">★</button>
+        <button class="star" data-v="4" aria-label="4 stars">★</button>
+        <button class="star" data-v="5" aria-label="5 stars">★</button>
+      </div>
+      <div class="scale"><span>Not great</span><span>Excellent</span></div>
+    </div>
+
+    <!-- STEP 2a — happy → Google -->
+    <div id="step-google" class="hidden">
+      <div class="big">🎉</div>
+      <h1>Thank you!</h1>
+      <p class="sub">We're so glad you had a great experience. Would you share it on Google?
+        It takes 30 seconds and helps your neighbors find us.</p>
+      <a class="btn" id="google-btn" href="#" target="_blank" rel="noopener">Leave a Google review&nbsp;&rarr;</a>
+      <p class="note" id="google-auto">Taking you to Google…</p>
+    </div>
+
+    <!-- STEP 2b — unhappy → private feedback -->
+    <div id="step-feedback" class="panel">
+      <h1 style="text-align:center">We're sorry we missed the mark.</h1>
+      <p class="sub" style="text-align:center">Tell us what went wrong and we'll do our best to make it
+        right. This goes <strong>privately</strong> to our team — not online.</p>
+      <textarea id="fb-text" placeholder="What could we have done better?"></textarea>
+      <input id="fb-name" type="text" placeholder="Your name (optional)">
+      <input id="fb-contact" type="text" placeholder="Phone or email so we can follow up (optional)">
+      <button class="btn" id="fb-send">Send private feedback</button>
+      <p class="note">Prefer to talk? Call us at <a href="tel:+19404000920">(940) 400-0920</a>.</p>
+    </div>
+
+    <!-- STEP 3 — feedback thanks -->
+    <div id="step-thanks" class="hidden">
+      <div class="big">🙏</div>
+      <h1>Thank you — we hear you.</h1>
+      <p class="sub">We've received your feedback and someone from our team will look into it.
+        We appreciate you giving us the chance to make it right.</p>
+    </div>
+  </div>
+
+  <p class="foot">
+    Lifetime Climate Controlled Storage · 400 W Park Ave, Iowa Park, TX 76367<br>
+    <a href="tel:+19404000920">(940) 400-0920</a> ·
+    <a href="https://lifetimeccs.com">lifetimeccs.com</a>
+  </p>
+</div>
+
+<script>
+  // ---- CONFIG (set at deploy) -------------------------------------------------
+  // Direct Google review link (4-5 stars go here).
+  var GOOGLE_REVIEW_URL = "https://g.page/r/CWX7EnTT1gPjEBM/review";
+  // Optional: POST endpoint that emails/logs private feedback (e.g. a Google Apps
+  // Script web app). If blank, the page falls back to opening the visitor's mail
+  // client prefilled to the facility. See DEPLOY.md.
+  var FEEDBACK_ENDPOINT = "";
+  var FEEDBACK_EMAIL = "info@lifetimeccs.com";
+  // ----------------------------------------------------------------------------
+
+  var rating = 0;
+  var stars = Array.prototype.slice.call(document.querySelectorAll('.star'));
+  function paint(n){ stars.forEach(function(s){ s.classList.toggle('lit', +s.dataset.v <= n); }); }
+  stars.forEach(function(s){
+    s.addEventListener('mouseenter', function(){ paint(+s.dataset.v); });
+    s.addEventListener('mouseleave', function(){ paint(rating); });
+    s.addEventListener('click', function(){ choose(+s.dataset.v); });
+  });
+
+  function show(id){ ['step-rate','step-google','step-feedback','step-thanks'].forEach(function(x){
+    var el=document.getElementById(x);
+    if(x===id){ el.classList.remove('hidden'); el.classList.add('show'); }
+    else { el.classList.add('hidden'); el.classList.remove('show'); }
+  }); }
+
+  function choose(n){
+    rating = n; paint(n);
+    if(n >= 4){
+      var btn=document.getElementById('google-btn');
+      btn.href = GOOGLE_REVIEW_URL;
+      show('step-google');
+      // small delay so the "thank you" registers, then auto-forward to Google
+      setTimeout(function(){ window.location.href = GOOGLE_REVIEW_URL; }, 1200);
+    } else {
+      document.getElementById('google-auto') && (document.getElementById('google-auto').style.display='none');
+      show('step-feedback');
+    }
+  }
+
+  document.getElementById('fb-send').addEventListener('click', function(){
+    var payload = {
+      rating: rating,
+      message: document.getElementById('fb-text').value.trim(),
+      name: document.getElementById('fb-name').value.trim(),
+      contact: document.getElementById('fb-contact').value.trim(),
+      facility: "Lifetime Climate Controlled Storage",
+      page: location.href
+    };
+    var done = function(){ show('step-thanks'); };
+    if(FEEDBACK_ENDPOINT){
+      fetch(FEEDBACK_ENDPOINT, { method:'POST', headers:{'Content-Type':'application/json'},
+                                body: JSON.stringify(payload) })
+        .then(done).catch(function(){ mailtoFallback(payload); done(); });
+    } else {
+      mailtoFallback(payload); done();
+    }
+  });
+
+  function mailtoFallback(p){
+    var subj = encodeURIComponent("Private feedback (" + p.rating + "★) — Lifetime Storage");
+    var body = encodeURIComponent(
+      "Rating: " + p.rating + "/5\n" +
+      "Name: " + (p.name || "—") + "\n" +
+      "Contact: " + (p.contact || "—") + "\n\n" +
+      (p.message || "(no message)"));
+    window.location.href = "mailto:" + FEEDBACK_EMAIL + "?subject=" + subj + "&body=" + body;
+  }
+</script>
+</body>
+</html>
