@@ -110,6 +110,9 @@
   // ----------------------------------------------------------------------------
 
   var rating = 0;
+  // Per-tenant token (added to the email link as ?t=...). Lets us nudge people who
+  // tapped 4-5 stars but never finished on Google. Opaque — carries no personal data.
+  var TOKEN = (new URLSearchParams(location.search)).get('t') || '';
   var stars = Array.prototype.slice.call(document.querySelectorAll('.star'));
   function paint(n){ stars.forEach(function(s){ s.classList.toggle('lit', +s.dataset.v <= n); }); }
   stars.forEach(function(s){
@@ -127,6 +130,12 @@
   function choose(n){
     rating = n; paint(n);
     if(n >= 4){
+      // Tell the relay this tenant started a 4-5 star review (fire-and-forget) so we
+      // can gently nudge them later if they don't actually post on Google.
+      if(TOKEN && FEEDBACK_ENDPOINT){
+        try { fetch(FEEDBACK_ENDPOINT, { method:'POST', mode:'no-cors',
+              body: JSON.stringify({ type:'startedreview', token:TOKEN, rating:n }) }); } catch(e){}
+      }
       var btn=document.getElementById('google-btn');
       btn.href = GOOGLE_REVIEW_URL;
       show('step-google');
